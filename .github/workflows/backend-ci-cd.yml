@@ -1,0 +1,68 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            # 1) Install Docker if not installed (safe to run multiple times)
+            if ! command -v docker > /dev/null 2>&1; then
+              sudo apt-get update -y
+              sudo apt-get install -y docker.io
+              sudo systemctl enable docker
+              sudo systemctl start docker
+            fi
+
+            # 2) Clone or update the repo on EC2
+            APP_DIR=/home/${USER}/ci-cd-backend
+            REPO_URL="https://github.com/alishair7071/ci-cd-backend.git"
+
+            if [ -d "$APP_DIR/.git" ]; then
+              cd "$APP_DIR"
+              git pull origin main
+            else
+              mkdir -p "$APP_DIR"
+              cd /home/${USER}
+              git clone "$REPO_URL" ci-cd-backend
+              cd "$APP_DIR"
+            fi
+
+            # 3) Build Docker image
+            sudo docker build -t ci-cd-backend:latest .
+
+            # 4) Restart container
+            sudo docker stop ci-cd-backend || true
+            sudo docker rm ci-cd-backend || true
+            sudo docker run -d --name ci-cd-backend -p 4000:4000 ci-cd-backend:latest
