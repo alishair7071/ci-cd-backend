@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-let messages = ["Hello from backend", "CI/CD demo message"];
+let messages = ["Hello from backend", "CI/CD demo message now updated"];
 
 app.get("/get-messages", (req, res) => {
   res.json({ messages });
