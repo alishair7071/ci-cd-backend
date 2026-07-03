@@ -42,8 +42,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # go to app directory
-            sudo su
-            cd /home/node-dir/ci-cd-backend
+            cd /home/ubuntu/api
 
             # pull latest code from GitHub
             git pull origin main
@@ -52,7 +51,7 @@ jobs:
             npm install --production
 
             # restart app with PM2
-            pm2 restart shopnest-api
+            pm2 restart api
 
             # verify app is running
             pm2 status
