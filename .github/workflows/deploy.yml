@@ -1,0 +1,57 @@
+# .github/workflows/deploy.yml
+
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]    # triggers on every push to main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+        # pipeline stops here if tests fail
+        # nothing gets deployed if tests are broken
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: test    # only runs if test job passes
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # go to app directory
+            cd /home/ubuntu/shopnest
+
+            # pull latest code from GitHub
+            git pull origin main
+
+            # install any new dependencies
+            npm install --production
+
+            # restart app with PM2
+            pm2 restart shopnest-api
+
+            # verify app is running
+            pm2 status
