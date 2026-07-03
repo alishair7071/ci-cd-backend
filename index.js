@@ -18,9 +18,14 @@ app.post("/add-message", (req, res) => {
   if (!text) {
     return res.status(400).json({ error: "text is required" });
   }
-
   messages.push(text);
   res.json({ messages });
+});
+
+
+
+app.get("/test", (req, res) => {
+  res.json({ message: "Test route is working!" });
 });
 
 app.listen(PORT, () => {
