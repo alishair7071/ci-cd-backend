@@ -42,7 +42,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # go to app directory
-            cd /home/ubuntu/shopnest
+            sudo su
+            cd /home/node-dir/ci-cd-backend
 
             # pull latest code from GitHub
             git pull origin main
