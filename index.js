@@ -25,7 +25,7 @@ app.post("/add-message", (req, res) => {
 
 
 app.get("/test", (req, res) => {
-  res.json({ message: "Test route is working! updated now urgentlxxxxxxx" });
+  res.json({ message: "Test route is working! updated now urgentlaaaaaaaa" });
 });
 
 app.listen(PORT, () => {
