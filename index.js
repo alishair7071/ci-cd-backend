@@ -25,7 +25,7 @@ app.post("/add-message", (req, res) => {
 
 
 app.get("/test", (req, res) => {
-  res.json({ message: "Test route is working! now automatedddddddd" });
+  res.json({ message: "Test route is working! now automatexxxxxxxxx" });
 });
 
 app.listen(PORT, () => {
